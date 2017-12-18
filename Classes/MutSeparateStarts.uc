@@ -1,15 +1,16 @@
-class MutSeparateStarts extends Mutator;
+class MutSeparateStarts extends Mutator config;
 
-var config float extraSpawnsRadius;
-var config int numControlPoints;
+var() config float extraSpawnsRadius;
+var() config int numControlPoints;
+var() config bool initialSpawnsAsCPs;
 
-var localized string radiusEntryLabel, radiusEntryDesc, numCPsEntryLabel, numCPsEntryDesc;
+var localized string radiusEntryLabel, radiusEntryDesc, numCPsEntryLabel, numCPsEntryDesc, iniCPsEntryLabel, iniCPsEntryDesc;
 
 var PlayerStart startOne, startTwo;
 var array< PlayerStart > playerStarts;
 var array< MSPControlPoint > createdCPs;
 
-function PreBeginPlay()
+simulated function PreBeginPlay()
 {
 	local int i, j, trueNumCPs;
 	local NavigationPoint L;
@@ -46,7 +47,7 @@ function PreBeginPlay()
 	
 	SetTeamAndActivate(startOne, 0);
 	SetTeamAndActivate(startTwo, 1);
-
+	
 	//extra playerStarts inside the provided radius
 	if(extraSpawnsRadius > 0){
 		for(i = 0; i < playerStarts.Length; i++){
@@ -76,9 +77,9 @@ function PreBeginPlay()
 			for(i = 0; i < trueNumCPs; i++){
 				//alternate between considering distances from start one and two
 				if(i % 2 == 0){
-					PutCPOnPlayerStart(startOne, biggestDist, CPsDist / Max(i / 2, 1));
+					PutCPOnNearbyPlayerStart(startOne, biggestDist, CPsDist / Max(i / 2, 1));
 				}else{
-					PutCPOnPlayerStart(startTwo, biggestDist, CPsDist / Max(i / 2, 1));
+					PutCPOnNearbyPlayerStart(startTwo, biggestDist, CPsDist / Max(i / 2, 1));
 				}
 			}
 		}
@@ -90,9 +91,12 @@ function PreBeginPlay()
 function SetTeamAndActivate(PlayerStart p, int desiredTeam){
 	p.bEnabled = true;
 	p.TeamNumber = desiredTeam;
+	if(initialSpawnsAsCPs){
+		SpawnCP(p);
+	}
 }
 
-function PutCPOnPlayerStart(PlayerStart referencePS, float veryBigDist, float desiredDist){
+function PutCPOnNearbyPlayerStart(PlayerStart referencePS, float veryBigDist, float desiredDist){
 	local int i;
 	local float curEvalDelta, nicestDelta;
 	local PlayerStart nicestPS;
@@ -118,7 +122,7 @@ function PutCPOnPlayerStart(PlayerStart referencePS, float veryBigDist, float de
 function SpawnCP(PlayerStart attachedStart){
 	local MSPControlPoint newCP;
 	
-	newCP = Spawn(class'MutSeparateStarts.MSPControlPoint',,,attachedStart.Location);
+	newCP = Spawn(class'MutSeparateStartsCP.MSPControlPoint',,,attachedStart.Location);
 	if(newCP != none){
 		newCP.controlledStart = attachedStart;
 		createdCPs.insert(0, 1);
@@ -149,6 +153,8 @@ static function string GetDisplayText(string PropName) {
 			return default.radiusEntryLabel;
 		case "numControlPoints":
 			return default.numCPsEntryLabel;
+		case "initialSpawnsAsCPs":
+			return default.iniCPsEntryLabel;
 	}
 	//return Super.GetDisplayText(PropName);
 }
@@ -163,6 +169,8 @@ static event string GetDescriptionText(string PropName) {
 			return default.radiusEntryDesc;
 		case "numControlPoints":
 			return default.numCPsEntryDesc;
+		case "initialSpawnsAsCPs":
+			return default.iniCPsEntryDesc;
 	}
 	return Super.GetDescriptionText(PropName);
 }
@@ -173,17 +181,24 @@ static function FillPlayInfo(PlayInfo PlayInfo)
 
 	PlayInfo.AddSetting(default.RulesGroup, "extraSpawnsRadius", GetDisplayText("extraSpawnsRadius"), 0, 0, "Text",   "8;0.0:99999.9");
 	PlayInfo.AddSetting(default.RulesGroup, "numControlPoints", GetDisplayText("numControlPoints"), 0, 0, "Text",   "8;0:99");
+	PlayInfo.AddSetting(default.RulesGroup, "initialSpawnsAsCPs", GetDisplayText("initialSpawnsAsCPs"), 0, 0, "Check", "");
 }
 
 defaultproperties
 {
+	extraSpawnsRadius=125.099998
+	numControlPoints=6
+	initialSpawnsAsCPs=false
+	radiusEntryLabel="Additional Player Starts Radius"
+	radiusEntryDesc="Any player start found within this radius from one of the farthest will be used by the respective team"
+	numCPsEntryLabel="Neutral Control Points"
+	numCPsEntryDesc="Sets the amount of initially neutral control points that will be placed in the map. The mutator will attempt to place the CPs so that each one has the same distance to each other"
+	iniCPsEntryLabel="Initial Playerstarts are CPs"
+	iniCPsEntryDesc="Can the initial team starts be captured like the neutral ones? (This can prevent a team from spawning!)"
 	GroupName="Spawn"
 	FriendlyName="Isolate Player Starts"
 	Description="In two-team matches, makes teams start as far away from each other as possible. May also spawn control points, which activate another spawn point for the team that controls it"
-	radiusEntryLabel="Additional Player Starts Radius"
-	radiusEntryDesc="Any player start found within this radius from one of the farthest will be used by the respective team"
-	numCPsEntryLabel="Control Points"
-	numCPsEntryDesc="Sets the amount of control points that will be placed in the map. The mutator will attempt to place the CPs so that each one has the same distance to each other"
-	extraSpawnsRadius=512.0
-	numControlPoints=0
+	bNetTemporary=True
+	bAlwaysRelevant=True
+	RemoteRole=ROLE_SimulatedProxy
 }

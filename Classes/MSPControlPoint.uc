@@ -24,6 +24,11 @@ function string GetHumanName()
 	return "MutSeparateStarts CP";
 }
 
+function string GetHumanReadableName()
+{
+	return "MutSeparateStarts CP";
+}
+
 simulated function PostNetReceive()
 {
 	local byte NewTeam;
@@ -203,46 +208,17 @@ function Timer()
 
 defaultproperties
 {
-     ControlSound=Sound'GameSounds.DDAlarm'
-     DomCombiner(0)=Combiner'XGameShaders.DomShaders.DomACombiner'
-     CRedState(0)=Texture'UCGeneric.SolidColours.Red'
-     CBlueState(0)=Texture'UCGeneric.SolidColours.Blue'
-     CNeutralState(0)=Texture'UCGeneric.SolidColours.White'
-     CDisableState(0)=Texture'UCGeneric.SolidColours.Black'
-     DomShader=Shader'XGameShaders.DomShaders.PulseAShader'
-     SRedState=Texture'XGameShaders.DomShaders.redgrid'
-     SBlueState=Texture'XGameShaders.DomShaders.bluegrid'
-     SNeutralState=Texture'XGameShaders.DomShaders.greygrid'
-     SDisableState=Texture'XGameShaders.DomShaders.greygrid'
-     PulseSpeed=1.000000
-     EffectOffset=(Z=60.000000)
-     bControllable=True
-     bTeamControlled=True
-     DefenderTeamIndex=255
      DestructionMessage="noooo"
-     LightType=LT_SubtlePulse
-     LightEffect=LE_QuadraticNonIncidence
-     LightHue=255
-     LightSaturation=255
-     LightBrightness=128.000000
-     LightRadius=6.000000
      DrawType=DT_None
      StaticMesh=None
-     bStatic=False
-	 bNoDelete=False
-     bHidden=False
+     bNoDelete=False
      bDynamicLight=False
-     bAlwaysRelevant=True
-     RemoteRole=ROLE_SimulatedProxy
-     DrawScale=0.600000
      PrePivot=(Z=35.000000)
-     Skins(0)=Texture'XGameTextures.DominationPointTex'
-     Skins(1)=Combiner'XGameShaders.DomShaders.DomPointACombiner'
-     SoundRadius=255.000000
-     CollisionRadius=60.000000
-     CollisionHeight=40.000000
-     bCollideActors=True
-	 bCollideWhenPlacing=False
-     bUseCylinderCollision=True
-     bNetNotify=True
+     bCollideWhenPlacing=False
+	RemoteRole=ROLE_SimulatedProxy
+	bAlwaysRelevant=True
+	bControllable=True
+	bTeamControlled=True
+	DefenderTeamIndex=255
+	bNetNotify=True
 }
